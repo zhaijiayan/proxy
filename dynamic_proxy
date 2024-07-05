@@ -1,0 +1,61 @@
+// 动态代理
+
+public interface Copy {
+    void copy();
+}
+
+public class ThirdCopy implements Copy{
+    @Override
+    public void copy() {
+        System.out.println("完成了copy");
+    }
+}
+
+public interface Payment {
+    String doPay(String uid);
+}
+
+public class ThirdChannelPayment implements Payment{
+    @Override
+    public String doPay(String uid) {
+        System.out.println("<uid>"+uid+"发起了支付");
+        return "success";
+    }
+}
+
+public class DynamicProxy implements InvocationHandler {
+
+    private Object target;
+
+    public Object bind(Object target){
+        this.target = target;
+        return Proxy.newProxyInstance(target.getClass().getClassLoader(), target.getClass().getInterfaces(),this);
+    }
+
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        System.out.println("a");
+        Object result = method.invoke(target, args);
+        System.out.println("b");
+        return result;
+    }
+}
+
+public class TestProxy {
+
+    public static void main(String[] args) {
+      
+        System.out.println("=======================================");
+        DynamicProxy dynamicProxy = new DynamicProxy();
+        Payment payment1 = new ThirdChannelPayment();
+        Payment bind = (Payment)dynamicProxy.bind(payment1);
+        bind.doPay("zhai");
+      
+        Copy copy = new ThirdCopy();
+        Copy bind1 = (Copy)dynamicProxy.bind(copy);
+        bind1.copy();
+    }
+}
+
+
