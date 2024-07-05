@@ -1,0 +1,50 @@
+// cglib 代理 解决不能继承问题
+
+public interface Payment {
+
+    String doPay(String uid);
+}
+
+public class ThirdChannelPayment implements Payment{
+    @Override
+    public String doPay(String uid) {
+        System.out.println("<uid>"+uid+"发起了支付");
+        return "success";
+    }
+}
+
+public class CglibDynamicProxy implements MethodInterceptor {
+
+    private Object target;
+
+    public Object getInstance(Object target){
+        this.target = target;
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(this.target.getClass());
+        enhancer.setCallback(this);
+        return enhancer.create();
+    }
+
+
+
+    @Override
+    public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+        System.out.println("a");
+        Object result = methodProxy.invokeSuper(o, objects);
+        System.out.println("b");
+        return result;
+    }
+}
+
+
+
+public class TestProxy {
+
+    public static void main(String[] args) {
+        System.out.println("=======================================cglib");
+        ThirdChannelPayment thirdChannelPayment = new ThirdChannelPayment();
+        CglibDynamicProxy cglibDynamicProxy = new CglibDynamicProxy();
+        ThirdChannelPayment instance = (ThirdChannelPayment) cglibDynamicProxy.getInstance(thirdChannelPayment);
+        System.out.println(instance.doPay("zhai"));
+    }
+}
