@@ -1,0 +1,37 @@
+// 静态代理
+
+public interface Copy {
+    void copy();
+}
+
+public class ThirdCopy implements Copy{
+    @Override
+    public void copy() {
+        System.out.println("完成了copy");
+    }
+}
+
+public class CopyLog {
+    public void log(String s){
+        System.out.println(s);
+    }
+}
+
+public class ThirdCopyProxy implements Copy{
+
+    private Copy copy = new ThirdCopy();
+    CopyLog copyLog =  new CopyLog();
+
+    @Override
+    public void copy() {
+        copyLog.log("zhai");
+        copy.copy();
+    }
+}
+
+public class TestStaticProxy {
+    public static void main(String[] args) {
+        ThirdCopyProxy thirdCopyProxy = new ThirdCopyProxy();
+        thirdCopyProxy.copy();
+    }
+}
